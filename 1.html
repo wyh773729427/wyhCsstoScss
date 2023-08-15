@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta http-equiv="X-UA-Compatible" content="ie=edge">
+		<title>Document</title>
+		<style>
+			body {
+				width: 100vw;
+				height: 100vh;
+				overflow: hidden;
+			}
+			body, div, textarea {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+			.box {
+				width: 100vw;
+				height: 100vh;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				overflow: hidden;
+			}
+
+			.textarea {
+				margin-bottom: 30px;
+				width: 800px;
+				height: 300px;
+			}
+
+			/* 为 textarea 设置基本样式 */
+			textarea {
+				font-family: Arial, sans-serif;
+				font-size: 14px;
+				padding: 10px;
+				border: 1px solid #ccc;
+				border-radius: 5px;
+				resize: vertical;
+				/* 允许垂直调整大小 */
+			}
+
+			/* 设置悬浮时的样式 */
+			textarea:hover {
+				border-color: #999;
+			}
+
+			/* 设置获得焦点时的样式 */
+			textarea:focus {
+				outline: none;
+				border-color: #007bff;
+				box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+			}
+
+			.hidden {
+				display: none;
+			}
+
+			.button {
+				margin-bottom: 30px;
+			}
+
+			/* 按钮基本样式 */
+			.button {
+				display: inline-block;
+				padding: 10px 20px;
+				font-size: 16px;
+				font-weight: bold;
+				color: #fff;
+				background: linear-gradient(45deg, #007bff, #00cc99);
+				border: none;
+				border-radius: 5px;
+				cursor: pointer;
+				position: relative;
+				overflow: hidden;
+			}
+
+			.button::before {
+				content: "";
+				position: absolute;
+				top: -50%;
+				left: -50%;
+				width: 200%;
+				height: 200%;
+				background: linear-gradient(45deg, rgba(255, 255, 255, 0.8) 0%, transparent 50%, rgba(255, 255, 255, 0.8) 100%);
+				transform: rotate(45deg);
+				display: none;
+			}
+
+			.button:hover::before {
+				display: block;
+				animation: shine 2s forwards;
+				animation-iteration-count: 1;
+			}
+
+			@keyframes shine {
+				0% {
+					transform: rotate(45deg) translateX(-200%);
+					opacity: 0;
+				}
+
+				50% {
+					opacity: 1;
+				}
+
+				100% {
+					transform: rotate(45deg) translateX(200%);
+					opacity: 0;
+				}
+		 }
+		 .title {
+			 line-height: 60px;
+			 font-size: 16px;
+			 text-align: center;
+			 font-weight: bold;
+		 }
+		 .footer  {
+			 width: 80%;
+			 text-align: right;
+			 padding-right: 60px;
+			 font-size: 12px;
+			 color: #999999;
+		 }
+		 .bold {
+			 font-weight: bold;
+		 }
+		</style>
+	</head>
+	<body>
+		<div id="app">
+			<div class="box">
+				<div class="title">WYH个人便捷开发: HTML结构转SCSS结构</div>
+				<textarea v-model="textarea" class="textarea" name="" id="" cols="30" rows="10"
+					placeholder="请在此处粘贴原html代码"></textarea>
+				<div class="button" @click="change">转换</div>
+				<textarea v-model="textarea2" class="textarea" name="" id="" cols="30" rows="10"
+					placeholder="此处将生成scss结构"></textarea>
+				<div class="footer"><span class="">BUG请联系微信</span>: <span class="bold">wyh_7737666666</span></div>
+			</div>
+			<div class="hidden" ref="dom" v-html="textarea"></div>
+		</div>
+
+		<script src="./vue.js"></script>
+
+		<script>
+			let app = new Vue({
+				el: '#app',
+				data: {
+					textarea: '',
+					textarea2: ''
+				},
+				methods: {
+					change() {
+						let dom = this.$refs.dom;
+						let res = JSON.stringify(this.deep(dom));
+						this.textarea2 = JSON.stringify(JSON.parse(res), null, 2).replace(/["|,|:]/g, '').slice(2, -1).replace(/^ {2}/gm, '');
+					},
+					deep(data) {
+						let res = {};
+						if (data.children && data.children.length > 0) {
+
+							for (let i = 0; i < data.children.length; i++) {
+								let item = data.children[i];
+								if (item.id) {
+									if(!res[`#${item.id}`]) {
+										res[`#${item.id}`] = this.deep(item);
+									}
+									else {
+										res[`#${item.id}`] = {...res[`#${item.id}`], ...this.deep(item)};
+									}
+								}
+								else if (item.className) {
+									if(!res[`.${item.className.split(' ').join('.')}`]) {
+										res[`.${item.className.split(' ').join('.')}`] = this.deep(item);
+									}
+									else {
+										res[`.${item.className.split(' ').join('.')}`] = {...res[`.${item.className.split(' ').join('.')}`], ...this.deep(item)};
+									}
+								}
+								// if(item.id) console.log(item.id)
+							}
+						}
+						return res;
+					}
+				}
+			});
+		</script>
+	</body>
+</html>
