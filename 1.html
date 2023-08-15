@@ -23,6 +23,8 @@
 				flex-direction: column;
 				align-items: center;
 				overflow: hidden;
+				background: url('./imgs/bg.png') no-repeat;
+				background-size: cover;
 			}
 
 			.textarea {
@@ -111,6 +113,7 @@
 				}
 		 }
 		 .title {
+			 color: #ffffff;
 			 line-height: 60px;
 			 font-size: 16px;
 			 text-align: center;
@@ -121,7 +124,7 @@
 			 text-align: right;
 			 padding-right: 60px;
 			 font-size: 12px;
-			 color: #999999;
+			 color: #eeeeee;
 		 }
 		 .bold {
 			 font-weight: bold;
@@ -155,12 +158,14 @@
 					change() {
 						let dom = this.$refs.dom;
 						let res = JSON.stringify(this.deep(dom));
-						this.textarea2 = JSON.stringify(JSON.parse(res), null, 2).replace(/["|,|:]/g, '').slice(2, -1).replace(/^ {2}/gm, '');
+						console.log(dom)
+						this.textarea2 = JSON.stringify(JSON.parse(res), null, 2).replace(/["|,|:]/g, '').slice(2, -1).replace(/^ {2}/gm, '').replace(/\&\s*\{\s*\}/g, '');
 					},
 					deep(data) {
+						console.log('children==', data.children)
+						
 						let res = {};
 						if (data.children && data.children.length > 0) {
-
 							for (let i = 0; i < data.children.length; i++) {
 								let item = data.children[i];
 								if (item.id) {
@@ -179,6 +184,11 @@
 										res[`.${item.className.split(' ').join('.')}`] = {...res[`.${item.className.split(' ').join('.')}`], ...this.deep(item)};
 									}
 								}
+								else {
+									// res = {...this.deep(item)};
+									res[item.tagName.toLowerCase()] = this.deep(item)
+								}
+								
 								// if(item.id) console.log(item.id)
 							}
 						}
